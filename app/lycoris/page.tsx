@@ -279,7 +279,7 @@ export default function Home() {
 
   return React.createElement(
     'main',
-    { className: 'min-h-screen bg-gradient-to-br from-slate-100 via-zinc-100 to-slate-200 text-slate-900 p-4 sm:p-6 max-w-md mx-auto pb-24 font-sans antialiased' },
+    { className: 'min-h-screen bg-gradient-to-br from-slate-100 via-zinc-100 to-slate-200 text-slate-900 p-4 sm:p-6 w-full max-w-md md:max-w-lg lg:max-w-2xl mx-auto pb-24 font-sans antialiased' },
     
     React.createElement(
       'header',
