@@ -41,11 +41,11 @@ export async function POST(req: Request) {
 
 【1. 基本データ】
 ・通常ゲーム数: ${games} G
-・CZ当選回数: \({cz} 回 (確率: 1/\){czProb})
-・AT当選回数: \({at} 回 (確率: 1/\){atProb})
-・ラッシュ直撃回数: \({directRush} 回 (確率: 1/\){directRushProb})
-・幼少期CZ当選回数: \({childhoodCz} 回 (確率: 1/\){childhoodCzProb})
-・通常時 共通ベル回数: \({commonBell} 回 (確率: 1/\){commonBellProb})
+・CZ当選回数: ${cz} 回 (確率: 1/${czProb})
+・AT当選回数: ${at} 回 (確率: 1/${atProb})
+・ラッシュ直撃回数: ${directRush} 回 (確率: 1/${directRushProb})
+・幼少期CZ当選回数: ${childhoodCz} 回 (確率: 1/${childhoodCzProb})
+・通常時 共通ベル回数: ${commonBell} 回 (確率: 1/${commonBellProb})
 
 【2. ST終了画面 カウント】
 [千束RUSH終了時]
