@@ -24,3 +24,8 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 例: セクションやブロック要素の上の余白を広げる */
+.element {
+  margin-top: 32px; /* 状況に合わせて 24px, 40px など調整 */
+}
