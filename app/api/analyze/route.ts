@@ -13,25 +13,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const {
-      games,
-      cz,
-      at,
-      episodes,
-      stScreens,
-      trophies,
-      rushEpisodes,
-      rushWEpisodes,
-      directRush,
-      childhoodCz,
-      commonBell,
-    } = await req.json();
+    const data = await req.json();
+    
+    // 文字列で送られてくる可能性のある数値を確実にNumber型に変換
+    const games = Number(data.games) || 0;
+    const cz = Number(data.cz) || 0;
+    const at = Number(data.at) || 0;
+    const directRush = Number(data.directRush) || 0;
+    const childhoodCz = Number(data.childhoodCz) || 0;
+    const commonBell = Number(data.commonBell) || 0;
 
-    const czProb = cz > 0 ? (games / cz).toFixed(1) : 'なし';
-    const atProb = at > 0 ? (games / at).toFixed(1) : 'なし';
-    const directRushProb = directRush > 0 ? (games / directRush).toFixed(1) : 'なし';
-    const childhoodCzProb = childhoodCz > 0 ? (games / childhoodCz).toFixed(1) : 'なし';
-    const commonBellProb = commonBell > 0 ? (games / commonBell).toFixed(1) : 'なし';
+    const episodes = data.episodes || {};
+    const stScreens = data.stScreens || {};
+    const trophies = data.trophies || {};
+    const rushEpisodes = data.rushEpisodes || {};
+    const rushWEpisodes = data.rushWEpisodes || {};
+
+    // 確率の計算
+    const czProb = cz > 0 && games > 0 ? (games / cz).toFixed(1) : 'なし';
+    const atProb = at > 0 && games > 0 ? (games / at).toFixed(1) : 'なし';
+    const directRushProb = directRush > 0 && games > 0 ? (games / directRush).toFixed(1) : 'なし';
+    const childhoodCzProb = childhoodCz > 0 && games > 0 ? (games / childhoodCz).toFixed(1) : 'なし';
+    const commonBellProb = commonBell > 0 && games > 0 ? (games / commonBell).toFixed(1) : 'なし';
 
     const prompt = `
 あなたは「スマスロ リコリコ（リコリス・リコイル）」のデータ解析・設定判別プロフェッショナルAIです。
@@ -40,53 +43,53 @@ export async function POST(req: Request) {
 ・通常ゲーム数: ${games} G
 ・CZ当選回数: \({cz} 回 (確率: 1/\){czProb})
 ・AT当選回数: \({at} 回 (確率: 1/\){atProb})
-・ラッシュ直撃回数: \({directRush || 0} 回 (確率: 1/\){directRushProb})
-・幼少期CZ当選回数: \({childhoodCz || 0} 回 (確率: 1/\){childhoodCzProb})
-・通常時 共通ベル回数: \({commonBell || 0} 回 (確率: 1/\){commonBellProb})
+・ラッシュ直撃回数: \({directRush} 回 (確率: 1/\){directRushProb})
+・幼少期CZ当選回数: \({childhoodCz} 回 (確率: 1/\){childhoodCzProb})
+・通常時 共通ベル回数: \({commonBell} 回 (確率: 1/\){commonBellProb})
 
 【2. ST終了画面 カウント】
 [千束RUSH終了時]
-・千束(制服) [デフォルト]: ${stScreens?.chisatoRush_chisatoUniform || 0} 回
-・たきな(制服) [法則矛盾]: ${stScreens?.chisatoRush_takinaUniform || 0} 回 (※設定4以上濃厚)
-・千束(私服) [高設定UP弱]: ${stScreens?.chisatoRush_chisatoCasual || 0} 回
-・たきな(私服) [キャラ矛盾]: ${stScreens?.chisatoRush_takinaCasual || 0} 回 (※設定4以上濃厚)
+・千束(制服) [デフォルト]: ${stScreens.chisatoRush_chisatoUniform || 0} 回
+・たきな(制服) [法則矛盾]: ${stScreens.chisatoRush_takinaUniform || 0} 回 (※設定4以上濃厚)
+・千束(私服) [高設定UP弱]: ${stScreens.chisatoRush_chisatoCasual || 0} 回
+・たきな(私服) [キャラ矛盾]: ${stScreens.chisatoRush_takinaCasual || 0} 回 (※設定4以上濃厚)
 
 [たきなRUSH終了時]
-・たきな(制服) [デフォルト]: ${stScreens?.takinaRush_takinaUniform || 0} 回
-・千束(制服) [法則矛盾]: ${stScreens?.takinaRush_chisatoUniform || 0} 回 (※設定4以上濃厚)
-・たきな(私服) [高設定UP弱]: ${stScreens?.takinaRush_takinaCasual || 0} 回
-・千束(私服) [キャラ矛盾]: ${stScreens?.takinaRush_chisatoCasual || 0} 回 (※設定4以上濃厚)
+・たきな(制服) [デフォルト]: ${stScreens.takinaRush_takinaUniform || 0} 回
+・千束(制服) [法則矛盾]: ${stScreens.takinaRush_chisatoUniform || 0} 回 (※設定4以上濃厚)
+・たきな(私服) [高設定UP弱]: ${stScreens.takinaRush_takinaCasual || 0} 回
+・千束(私服) [キャラ矛盾]: ${stScreens.takinaRush_chisatoCasual || 0} 回 (※設定4以上濃厚)
 
 [共通画面]
-・千束&たきな(ドレスコード): ${stScreens?.dressCode || 0} 回 (高設定UP強)
-・押上の風景: ${stScreens?.oshiage || 0} 回 (設定2以上濃厚)
-・ロボ太: ${stScreens?.robota || 0} 回 (設定4以上濃厚)
-・ハワイ: ${stScreens?.hawaii || 0} 回 (設定6濃厚)
+・千束&たきな(ドレスコード): ${stScreens.dressCode || 0} 回 (高設定UP強)
+・押上の風景: ${stScreens.oshiage || 0} 回 (設定2以上濃厚)
+・ロボ太: ${stScreens.robota || 0} 回 (設定4以上濃厚)
+・ハワイ: ${stScreens.hawaii || 0} 回 (設定6濃厚)
 
 【3. サミートロフィー カウント】
-・銅: ${trophies?.bronze || 0} 回 (設定2以上濃厚)
-・銀: ${trophies?.silver || 0} 回 (設定3以上濃厚)
-・金: ${trophies?.gold || 0} 回 (設定4以上濃厚)
-・キリン柄: ${trophies?.giraffe || 0} 回 (設定5以上濃厚)
-・虹: ${trophies?.rainbow || 0} 回 (設定6濃厚)
+・銅: ${trophies.bronze || 0} 回 (設定2以上濃厚)
+・銀: ${trophies.silver || 0} 回 (設定3以上濃厚)
+・金: ${trophies.gold || 0} 回 (設定4以上濃厚)
+・キリン柄: ${trophies.giraffe || 0} 回 (設定5以上濃厚)
+・虹: ${trophies.rainbow || 0} 回 (設定6濃厚)
 
 【4. プロローグエピソード カウント】
-・【EP1】Time will tell ① [デフォルト]: ${episodes?.ep1 || 0} 回
-・【EP2】The more the merrier [デフォルト]: ${episodes?.ep2 || 0} 回
-・【EP3】Repay evil with evil [高設定期待度UP(弱)]: ${episodes?.ep3 || 0} 回
-・【EP4】Time will tell ② [高設定期待度UP(強)]: ${episodes?.ep4 || 0} 回
+・【EP1】Time will tell ① [デフォルト]: ${episodes.ep1 || 0} 回
+・【EP2】The more the merrier [デフォルト]: ${episodes.ep2 || 0} 回
+・【EP3】Repay evil with evil [高設定期待度UP(弱)]: ${episodes.ep3 || 0} 回
+・【EP4】Time will tell ② [高設定期待度UP(強)]: ${episodes.ep4 || 0} 回
 
 【5. リコリスラッシュ中 エピソードボーナス カウント】
-・【EP1】Easy does it [デフォルト]: ${rushEpisodes?.ep1 || 0} 回
-・【EP2】Nothing seek, nothing find [デフォルト]: ${rushEpisodes?.ep2 || 0} 回
-・【EP3】Opposites attract [高設定期待度UP(弱)]: ${rushEpisodes?.ep3 || 0} 回
-・【EP4】Recoil of Lycoris −side千束＆真島− [高設定期待度UP(強)]: ${rushEpisodes?.ep4 || 0} 回
+・【EP1】Easy does it [デフォルト]: ${rushEpisodes.ep1 || 0} 回
+・【EP2】Nothing seek, nothing find [デフォルト]: ${rushEpisodes.ep2 || 0} 回
+・【EP3】Opposites attract [高設定期待度UP(弱)]: ${rushEpisodes.ep3 || 0} 回
+・【EP4】Recoil of Lycoris −side千束＆真島− [高設定期待度UP(強)]: ${rushEpisodes.ep4 || 0} 回
 
 【6. リコリスラッシュW中 エピソードボーナス カウント】
-・【EP1】More haste, less speed [デフォルト]: ${rushWEpisodes?.ep1 || 0} 回
-・【EP2】So far, so good [デフォルト]: ${rushWEpisodes?.ep2 || 0} 回
-・【EP3】Recoil of Lycoris −sideリコリコ− [高設定期待度UP(弱)]: ${rushWEpisodes?.ep3 || 0} 回
-・【EP4】Recoil of Lycoris −sideハワイ− [高設定期待度UP(強)]: ${rushWEpisodes?.ep4 || 0} 回
+・【EP1】More haste, less speed [デフォルト]: ${rushWEpisodes.ep1 || 0} 回
+・【EP2】So far, so good [デフォルト]: ${rushWEpisodes.ep2 || 0} 回
+・【EP3】Recoil of Lycoris −sideリコリコ− [高設定期待度UP(弱)]: ${rushWEpisodes.ep3 || 0} 回
+・【EP4】Recoil of Lycoris −sideハワイ− [高設定期待度UP(強)]: ${rushWEpisodes.ep4 || 0} 回
 
 【7. 主要設定差の基準値】
 ・ラッシュ直撃確率: 設定1 (1/22429.5) 〜 設定6 (1/6263.7)
@@ -114,6 +117,7 @@ export async function POST(req: Request) {
       try {
         attempts++;
         response = await ai.models.generateContent({
+          // ※モデル名を有効なものに修正しました
           model: 'gemini-3.8-flash',
           contents: prompt,
         });
