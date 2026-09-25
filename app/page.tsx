@@ -78,6 +78,14 @@ export default function Home() {
     });
   };
 
+  const updateCzCount = (delta: number) => {
+    setCz((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
+  };
+
+  const updateAtCount = (delta: number) => {
+    setAt((prev) => String(Math.max(0, (Number(prev) || 0) + delta)));
+  };
+
   const updateEpisodeCount = (key: keyof typeof episodes, delta: number) => {
     setEpisodes((prev) => ({
       ...prev,
@@ -166,353 +174,125 @@ export default function Home() {
     }
   };
 
-  // プロローグエピソード用 カウンター描画
-  const renderEpisodeCounter = (
-    label: string,
-    subLabel: string,
-    key: keyof typeof episodes
-  ) =>
+  // 算出される確率系
+  const czProb = Number(cz) > 0 && Number(games) > 0 ? (Number(games) / Number(cz)).toFixed(1) : null;
+  const atProb = Number(at) > 0 && Number(games) > 0 ? (Number(games) / Number(at)).toFixed(1) : null;
+  const directRushProb = directRush > 0 && Number(games) > 0 ? (Number(games) / directRush).toFixed(1) : null;
+  const childhoodCzProb = childhoodCz > 0 && Number(games) > 0 ? (Number(games) / childhoodCz).toFixed(1) : null;
+  const commonBellProb = commonBell > 0 && Number(games) > 0 ? (Number(games) / commonBell).toFixed(1) : null;
+
+  // 汎用カウンターコンポーネント用
+  const renderEpisodeCounter = (label: string, subLabel: string, key: keyof typeof episodes) =>
     React.createElement(
       'div',
-      {
-        className:
-          'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60',
-      },
+      { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60' },
       React.createElement(
         'div',
         { className: 'flex-1 pr-3' },
-        React.createElement(
-          'p',
-          { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-          label
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-xs text-slate-500 leading-snug' },
-          subLabel
-        )
+        React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, label),
+        React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, subLabel)
       ),
       React.createElement(
         'div',
         { className: 'flex items-center space-x-3' },
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateEpisodeCount(key, -1),
-            className:
-              'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '-'
-        ),
-        React.createElement(
-          'span',
-          {
-            className:
-              'w-8 text-center font-mono font-bold text-base text-rose-600',
-          },
-          episodes[key]
-        ),
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateEpisodeCount(key, 1),
-            className:
-              'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '+'
-        )
+        React.createElement('button', { type: 'button', onClick: () => updateEpisodeCount(key, -1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+        React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, episodes[key]),
+        React.createElement('button', { type: 'button', onClick: () => updateEpisodeCount(key, 1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
       )
     );
 
-  // ST終了画面用 カウンター描画
-  const renderScreenCounter = (
-    label: string,
-    subLabel: string,
-    key: keyof typeof stScreens
-  ) =>
+  const renderScreenCounter = (label: string, subLabel: string, key: keyof typeof stScreens) =>
     React.createElement(
       'div',
-      {
-        className:
-          'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60',
-      },
+      { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60' },
       React.createElement(
         'div',
         { className: 'flex-1 pr-3' },
-        React.createElement(
-          'p',
-          { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-          label
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-xs text-slate-500 leading-snug' },
-          subLabel
-        )
+        React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, label),
+        React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, subLabel)
       ),
       React.createElement(
         'div',
         { className: 'flex items-center space-x-3' },
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateScreenCount(key, -1),
-            className:
-              'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '-'
-        ),
-        React.createElement(
-          'span',
-          {
-            className:
-              'w-8 text-center font-mono font-bold text-base text-rose-600',
-          },
-          stScreens[key]
-        ),
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateScreenCount(key, 1),
-            className:
-              'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '+'
-        )
+        React.createElement('button', { type: 'button', onClick: () => updateScreenCount(key, -1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+        React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, stScreens[key]),
+        React.createElement('button', { type: 'button', onClick: () => updateScreenCount(key, 1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
       )
     );
 
-  // トロフィー用 カウンター描画
-  const renderTrophyCounter = (
-    label: string,
-    subLabel: string,
-    key: keyof typeof trophies
-  ) =>
+  const renderTrophyCounter = (label: string, subLabel: string, key: keyof typeof trophies) =>
     React.createElement(
       'div',
-      {
-        className:
-          'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60',
-      },
+      { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60' },
       React.createElement(
         'div',
         { className: 'flex-1 pr-3' },
-        React.createElement(
-          'p',
-          { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-          label
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-xs text-slate-500 leading-snug' },
-          subLabel
-        )
+        React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, label),
+        React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, subLabel)
       ),
       React.createElement(
         'div',
         { className: 'flex items-center space-x-3' },
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateTrophyCount(key, -1),
-            className:
-              'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '-'
-        ),
-        React.createElement(
-          'span',
-          {
-            className:
-              'w-8 text-center font-mono font-bold text-base text-rose-600',
-          },
-          trophies[key]
-        ),
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateTrophyCount(key, 1),
-            className:
-              'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '+'
-        )
+        React.createElement('button', { type: 'button', onClick: () => updateTrophyCount(key, -1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+        React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, trophies[key]),
+        React.createElement('button', { type: 'button', onClick: () => updateTrophyCount(key, 1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
       )
     );
 
-  // リコリスラッシュ中 エピソードボーナス用 カウンター描画
-  const renderRushEpisodeCounter = (
-    label: string,
-    subLabel: string,
-    key: keyof typeof rushEpisodes
-  ) =>
+  const renderRushEpisodeCounter = (label: string, subLabel: string, key: keyof typeof rushEpisodes) =>
     React.createElement(
       'div',
-      {
-        className:
-          'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60',
-      },
+      { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60' },
       React.createElement(
         'div',
         { className: 'flex-1 pr-3' },
-        React.createElement(
-          'p',
-          { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-          label
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-xs text-slate-500 leading-snug' },
-          subLabel
-        )
+        React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, label),
+        React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, subLabel)
       ),
       React.createElement(
         'div',
         { className: 'flex items-center space-x-3' },
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateRushEpisodeCount(key, -1),
-            className:
-              'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '-'
-        ),
-        React.createElement(
-          'span',
-          {
-            className:
-              'w-8 text-center font-mono font-bold text-base text-rose-600',
-          },
-          rushEpisodes[key]
-        ),
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateRushEpisodeCount(key, 1),
-            className:
-              'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '+'
-        )
+        React.createElement('button', { type: 'button', onClick: () => updateRushEpisodeCount(key, -1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+        React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, rushEpisodes[key]),
+        React.createElement('button', { type: 'button', onClick: () => updateRushEpisodeCount(key, 1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
       )
     );
 
-  // リコリスラッシュW中 エピソードボーナス用 カウンター描画
-  const renderRushWEpisodeCounter = (
-    label: string,
-    subLabel: string,
-    key: keyof typeof rushWEpisodes
-  ) =>
+  const renderRushWEpisodeCounter = (label: string, subLabel: string, key: keyof typeof rushWEpisodes) =>
     React.createElement(
       'div',
-      {
-        className:
-          'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60',
-      },
+      { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs transition hover:bg-slate-100/60' },
       React.createElement(
         'div',
         { className: 'flex-1 pr-3' },
-        React.createElement(
-          'p',
-          { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-          label
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-xs text-slate-500 leading-snug' },
-          subLabel
-        )
+        React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, label),
+        React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, subLabel)
       ),
       React.createElement(
         'div',
         { className: 'flex items-center space-x-3' },
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateRushWEpisodeCount(key, -1),
-            className:
-              'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '-'
-        ),
-        React.createElement(
-          'span',
-          {
-            className:
-              'w-8 text-center font-mono font-bold text-base text-rose-600',
-          },
-          rushWEpisodes[key]
-        ),
-        React.createElement(
-          'button',
-          {
-            type: 'button',
-            onClick: () => updateRushWEpisodeCount(key, 1),
-            className:
-              'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-          },
-          '+'
-        )
+        React.createElement('button', { type: 'button', onClick: () => updateRushWEpisodeCount(key, -1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+        React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, rushWEpisodes[key]),
+        React.createElement('button', { type: 'button', onClick: () => updateRushWEpisodeCount(key, 1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
       )
     );
-
-  // 算出した直撃確率
-  const directRushProb =
-    directRush > 0 && Number(games) > 0
-      ? (Number(games) / directRush).toFixed(1)
-      : null;
-
-  // 算出した幼少期CZ確率
-  const childhoodCzProb =
-    childhoodCz > 0 && Number(games) > 0
-      ? (Number(games) / childhoodCz).toFixed(1)
-      : null;
-
-  // 算出した共通ベル確率
-  const commonBellProb =
-    commonBell > 0 && Number(games) > 0
-      ? (Number(games) / commonBell).toFixed(1)
-      : null;
 
   return React.createElement(
     'main',
-    {
-      className:
-        'min-h-screen bg-gradient-to-br from-slate-100 via-zinc-100 to-slate-200 text-slate-900 p-4 sm:p-6 max-w-md mx-auto pb-24 font-sans antialiased',
-    },
+    { className: 'min-h-screen bg-gradient-to-br from-slate-100 via-zinc-100 to-slate-200 text-slate-900 p-4 sm:p-6 max-w-md mx-auto pb-24 font-sans antialiased' },
+    
     React.createElement(
       'header',
       { className: 'text-center my-6' },
-      React.createElement(
-        'span',
-        { className: 'inline-block px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full mb-2 tracking-wide uppercase' },
-        'Lycoris Recoil Analytics'
-      ),
-      React.createElement(
-        'h1',
-        { className: 'text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight' },
-        'スマスロ リコリコ 設定推測 AI'
-      )
+      React.createElement('span', { className: 'inline-block px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full mb-2 tracking-wide uppercase' }, 'Lycoris Recoil Analytics'),
+      React.createElement('h1', { className: 'text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight' }, 'スマスロ リコリコ 設定推測 AI')
     ),
 
     React.createElement(
       'div',
-      {
-        className:
-          'bg-white/90 backdrop-blur-md p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 space-y-6',
-      },
+      { className: 'bg-white/90 backdrop-blur-md p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 space-y-6' },
 
-      // 1. 基本データ
+      // 1. 基本データ (ゲーム数 + CZ/AT カウンター)
       React.createElement(
         'div',
         { className: 'space-y-4 border-b border-slate-100 pb-6' },
@@ -526,103 +306,64 @@ export default function Home() {
             '1. 基本データ'
           )
         ),
+        
+        // ゲーム数入力
         React.createElement(
           'div',
           { className: 'space-y-1.5' },
-          React.createElement(
-            'label',
-            { className: 'block text-xs font-bold text-slate-600 uppercase tracking-wider' },
-            '通常時 総ゲーム数 (G)*'
-          ),
+          React.createElement('label', { className: 'block text-xs font-bold text-slate-600 uppercase tracking-wider' }, '通常時 総ゲーム数 (G)*'),
           React.createElement('input', {
             type: 'number',
             value: games,
             onChange: (e) => setGames(e.target.value),
             onClick: (e) => (e.target as HTMLInputElement).select(),
-            className:
-              'w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition shadow-2xs',
+            className: 'w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition shadow-2xs',
           }),
           React.createElement(
             'div',
             { className: 'grid grid-cols-4 gap-2 pt-1.5' },
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => addGames(1000),
-                className:
-                  'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition',
-              },
-              '+1000'
-            ),
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => addGames(100),
-                className:
-                  'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition',
-              },
-              '+100'
-            ),
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => addGames(10),
-                className:
-                  'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition',
-              },
-              '+10'
-            ),
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: () => addGames(1),
-                className:
-                  'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition',
-              },
-              '+1'
-            )
+            React.createElement('button', { type: 'button', onClick: () => addGames(1000), className: 'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition' }, '+1000'),
+            React.createElement('button', { type: 'button', onClick: () => addGames(100), className: 'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition' }, '+100'),
+            React.createElement('button', { type: 'button', onClick: () => addGames(10), className: 'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition' }, '+10'),
+            React.createElement('button', { type: 'button', onClick: () => addGames(1), className: 'py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-xs font-bold rounded-lg border border-slate-200 text-slate-700 shadow-2xs transition' }, '+1')
           )
         ),
+
+        // CZ当選回数 カウンター
         React.createElement(
           'div',
-          { className: 'grid grid-cols-2 gap-3 pt-2' },
+          { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 mt-4 shadow-2xs' },
           React.createElement(
             'div',
-            { className: 'space-y-1.5' },
-            React.createElement(
-              'label',
-              { className: 'block text-xs font-bold text-slate-600 uppercase tracking-wider' },
-              'CZ当選回数*'
-            ),
-            React.createElement('input', {
-              type: 'number',
-              value: cz,
-              onChange: (e) => setCz(e.target.value),
-              onClick: (e) => (e.target as HTMLInputElement).select(),
-              className:
-                'w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition shadow-2xs',
-            })
+            { className: 'flex-1 pr-3' },
+            React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, 'CZ 当選回数'),
+            React.createElement('p', { className: 'text-xs text-slate-500 leading-snug font-mono' }, czProb ? `確率: 1/${czProb}` : '確率: -')
           ),
           React.createElement(
             'div',
-            { className: 'space-y-1.5' },
-            React.createElement(
-              'label',
-              { className: 'block text-xs font-bold text-slate-600 uppercase tracking-wider' },
-              'AT当選回数*'
-            ),
-            React.createElement('input', {
-              type: 'number',
-              value: at,
-              onChange: (e) => setAt(e.target.value),
-              onClick: (e) => (e.target as HTMLInputElement).select(),
-              className:
-                'w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition shadow-2xs',
-            })
+            { className: 'flex items-center space-x-3' },
+            React.createElement('button', { type: 'button', onClick: () => updateCzCount(-1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+            React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, cz),
+            React.createElement('button', { type: 'button', onClick: () => updateCzCount(1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
+          )
+        ),
+
+        // AT当選回数 カウンター
+        React.createElement(
+          'div',
+          { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs' },
+          React.createElement(
+            'div',
+            { className: 'flex-1 pr-3' },
+            React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, 'AT 当選回数'),
+            React.createElement('p', { className: 'text-xs text-slate-500 leading-snug font-mono' }, atProb ? `確率: 1/${atProb}` : '確率: -')
+          ),
+          React.createElement(
+            'div',
+            { className: 'flex items-center space-x-3' },
+            React.createElement('button', { type: 'button', onClick: () => updateAtCount(-1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+            React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, at),
+            React.createElement('button', { type: 'button', onClick: () => updateAtCount(1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
           )
         )
       ),
@@ -647,45 +388,30 @@ export default function Home() {
           )
         ),
 
-        // 千束RUSH時
         React.createElement(
           'div',
           { className: 'space-y-2 border-l-3 border-rose-500 pl-3.5 py-1 my-3' },
-          React.createElement(
-            'p',
-            { className: 'text-xs font-bold text-rose-700 uppercase tracking-wider mb-2' },
-            '【千束RUSH終了時】'
-          ),
+          React.createElement('p', { className: 'text-xs font-bold text-rose-700 uppercase tracking-wider mb-2' }, '【千束RUSH終了時】'),
           renderScreenCounter('千束(制服)', 'デフォルト', 'chisatoRush_chisatoUniform'),
           renderScreenCounter('たきな(制服)', '法則矛盾 (設定4以上濃厚)', 'chisatoRush_takinaUniform'),
           renderScreenCounter('千束(私服)', '高設定期待度UP (弱)', 'chisatoRush_chisatoCasual'),
           renderScreenCounter('たきな(私服)', 'キャラ矛盾 (設定4以上濃厚)', 'chisatoRush_takinaCasual')
         ),
 
-        // たきなRUSH時
         React.createElement(
           'div',
           { className: 'space-y-2 border-l-3 border-indigo-500 pl-3.5 py-1 my-4' },
-          React.createElement(
-            'p',
-            { className: 'text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2' },
-            '【たきなRUSH終了時】'
-          ),
+          React.createElement('p', { className: 'text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2' }, '【たきなRUSH終了時】'),
           renderScreenCounter('たきな(制服)', 'デフォルト', 'takinaRush_takinaUniform'),
           renderScreenCounter('千束(制服)', '法則矛盾 (設定4以上濃厚)', 'takinaRush_chisatoUniform'),
           renderScreenCounter('たきな(私服)', '高設定期待度UP (弱)', 'takinaRush_takinaCasual'),
           renderScreenCounter('千束(私服)', 'キャラ矛盾 (設定4以上濃厚)', 'takinaRush_chisatoCasual')
         ),
 
-        // 共通・確定系
         React.createElement(
           'div',
           { className: 'space-y-2 border-l-3 border-amber-500 pl-3.5 py-1 my-4' },
-          React.createElement(
-            'p',
-            { className: 'text-xs font-bold text-amber-700 uppercase tracking-wider mb-2' },
-            '【共通示唆・確定画面】'
-          ),
+          React.createElement('p', { className: 'text-xs font-bold text-amber-700 uppercase tracking-wider mb-2' }, '【共通示唆・確定画面】'),
           renderScreenCounter('千束&たきな(ドレス)', '高設定期待度UP (強)', 'dressCode'),
           renderScreenCounter('押上の風景', '設定2以上濃厚', 'oshiage'),
           renderScreenCounter('ロボ太', '設定4以上濃厚', 'robota'),
@@ -834,55 +560,19 @@ export default function Home() {
           { className: 'space-y-2 border-l-3 border-orange-500 pl-3.5 py-1 my-3' },
           React.createElement(
             'div',
-            {
-              className:
-                'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs',
-            },
+            { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs' },
             React.createElement(
               'div',
               { className: 'flex-1 pr-3' },
-              React.createElement(
-                'p',
-                { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-                '通常時 ラッシュ直撃回数'
-              ),
-              React.createElement(
-                'p',
-                { className: 'text-xs text-slate-500 leading-snug' },
-                '設定1: 1/22429.5 〜 設定6: 1/6263.7'
-              )
+              React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, '通常時 ラッシュ直撃回数'),
+              React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, '設定1: 1/22429.5 〜 設定6: 1/6263.7')
             ),
             React.createElement(
               'div',
               { className: 'flex items-center space-x-3' },
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateDirectRushCount(-1),
-                  className:
-                    'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                },
-                '-'
-              ),
-              React.createElement(
-                'span',
-                {
-                  className:
-                    'w-8 text-center font-mono font-bold text-base text-rose-600',
-                },
-                directRush
-              ),
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateDirectRushCount(1),
-                  className:
-                    'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                },
-                '+'
-              )
+              React.createElement('button', { type: 'button', onClick: () => updateDirectRushCount(-1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+              React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, directRush),
+              React.createElement('button', { type: 'button', onClick: () => updateDirectRushCount(1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
             )
           )
         )
@@ -912,55 +602,19 @@ export default function Home() {
           { className: 'space-y-2 border-l-3 border-pink-500 pl-3.5 py-1 my-3' },
           React.createElement(
             'div',
-            {
-              className:
-                'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs',
-            },
+            { className: 'flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs' },
             React.createElement(
               'div',
               { className: 'flex-1 pr-3' },
-              React.createElement(
-                'p',
-                { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-                '幼少期CZ当選回数'
-              ),
-              React.createElement(
-                'p',
-                { className: 'text-xs text-slate-500 leading-snug' },
-                '設定1: 1/3965.0 〜 設定6: 高確率（設定差大）'
-              )
+              React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, '幼少期CZ当選回数'),
+              React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, '設定1: 1/3965.0 〜 設定6: 高確率（設定差大）')
             ),
             React.createElement(
               'div',
               { className: 'flex items-center space-x-3' },
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateChildhoodCzCount(-1),
-                  className:
-                    'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                },
-                '-'
-              ),
-              React.createElement(
-                'span',
-                {
-                  className:
-                    'w-8 text-center font-mono font-bold text-base text-rose-600',
-                },
-                childhoodCz
-              ),
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateChildhoodCzCount(1),
-                  className:
-                    'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                },
-                '+'
-              )
+              React.createElement('button', { type: 'button', onClick: () => updateChildhoodCzCount(-1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+              React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, childhoodCz),
+              React.createElement('button', { type: 'button', onClick: () => updateChildhoodCzCount(1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
             )
           )
         )
@@ -990,93 +644,30 @@ export default function Home() {
           { className: 'space-y-2 border-l-3 border-amber-400 pl-3.5 py-1 my-3' },
           React.createElement(
             'div',
-            {
-              className:
-                'p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs space-y-3',
-            },
+            { className: 'p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 my-2 shadow-2xs space-y-3' },
             React.createElement(
               'div',
               { className: 'flex justify-between items-center' },
               React.createElement(
                 'div',
                 { className: 'pr-3' },
-                React.createElement(
-                  'p',
-                  { className: 'text-sm font-bold text-slate-800 mb-0.5' },
-                  '通常時 共通ベル回数'
-                ),
-                React.createElement(
-                  'p',
-                  { className: 'text-xs text-slate-500 leading-snug' },
-                  '設定1: 1/95.8 〜 設定6: 1/79.1'
-                )
+                React.createElement('p', { className: 'text-sm font-bold text-slate-800 mb-0.5' }, '通常時 共通ベル回数'),
+                React.createElement('p', { className: 'text-xs text-slate-500 leading-snug' }, '設定1: 1/95.8 〜 設定6: 1/79.1')
               ),
               React.createElement(
                 'div',
                 { className: 'flex items-center space-x-3' },
-                React.createElement(
-                  'button',
-                  {
-                    type: 'button',
-                    onClick: () => updateCommonBellCount(-1),
-                    className:
-                      'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                  },
-                  '-'
-                ),
-                React.createElement(
-                  'span',
-                  {
-                    className:
-                      'w-8 text-center font-mono font-bold text-base text-rose-600',
-                  },
-                  commonBell
-                ),
-                React.createElement(
-                  'button',
-                  {
-                    type: 'button',
-                    onClick: () => updateCommonBellCount(1),
-                    className:
-                      'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition',
-                  },
-                  '+'
-                )
+                React.createElement('button', { type: 'button', onClick: () => updateCommonBellCount(-1), className: 'w-9 h-9 bg-white text-slate-700 rounded-lg font-bold border border-slate-300 hover:bg-slate-100 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '-'),
+                React.createElement('span', { className: 'w-8 text-center font-mono font-bold text-base text-rose-600' }, commonBell),
+                React.createElement('button', { type: 'button', onClick: () => updateCommonBellCount(1), className: 'w-9 h-9 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 active:scale-95 text-base flex items-center justify-center shadow-xs transition' }, '+')
               )
             ),
             React.createElement(
               'div',
               { className: 'grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/60' },
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateCommonBellCount(10),
-                  className:
-                    'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition',
-                },
-                '+10'
-              ),
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateCommonBellCount(5),
-                  className:
-                    'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition',
-                },
-                '+5'
-              ),
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: () => updateCommonBellCount(1),
-                  className:
-                    'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition',
-                },
-                '+1'
-              )
+              React.createElement('button', { type: 'button', onClick: () => updateCommonBellCount(10), className: 'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition' }, '+10'),
+              React.createElement('button', { type: 'button', onClick: () => updateCommonBellCount(5), className: 'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition' }, '+5'),
+              React.createElement('button', { type: 'button', onClick: () => updateCommonBellCount(1), className: 'py-2 bg-white hover:bg-slate-100 active:scale-95 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 shadow-2xs transition' }, '+1')
             )
           )
         )
@@ -1087,8 +678,7 @@ export default function Home() {
         {
           onClick: handleAnalyze,
           disabled: loading,
-          className:
-            'w-full py-4 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-base rounded-xl transition disabled:opacity-50 mt-8 shadow-lg shadow-rose-600/25 active:scale-98 tracking-wide',
+          className: 'w-full py-4 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-base rounded-xl transition disabled:opacity-50 mt-8 shadow-lg shadow-rose-600/25 active:scale-98 tracking-wide',
         },
         loading ? 'AIが分析中...' : '設定判別を行う'
       )
@@ -1097,19 +687,12 @@ export default function Home() {
     result &&
       React.createElement(
         'div',
-        {
-          className:
-            'mt-8 p-5 sm:p-6 bg-white rounded-3xl border border-rose-200/80 space-y-3 shadow-xl shadow-slate-200/50',
-        },
+        { className: 'mt-8 p-5 sm:p-6 bg-white rounded-3xl border border-rose-200/80 space-y-3 shadow-xl shadow-slate-200/50' },
         React.createElement(
           'div',
           { className: 'flex items-center gap-2 border-b border-slate-100 pb-3' },
           React.createElement('span', { className: 'w-3 h-3 rounded-full bg-rose-600' }),
-          React.createElement(
-            'h2',
-            { className: 'font-extrabold text-lg text-slate-900 tracking-tight' },
-            'AIプロフェッショナル分析結果'
-          )
+          React.createElement('h2', { className: 'font-extrabold text-lg text-slate-900 tracking-tight' }, 'AIプロフェッショナル分析結果')
         ),
         React.createElement(
           'div',
